@@ -1,0 +1,2 @@
+sudo chmod 600 /etc/app.env
+sudo chown ubuntu:ubuntu /etc/app.env
