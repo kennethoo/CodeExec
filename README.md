@@ -1,16 +1,14 @@
 # CodeExec RCE - Remote Code Execution Backend
 
-A secure, scalable Remote Code Execution (RCE) service that allows users to execute code in multiple programming languages through a Docker-isolated API. Built with Node.js, Express, MongoDB, and Docker.
+A simple, secure Remote Code Execution (RCE) service that allows users to execute code in multiple programming languages through a Docker-isolated API. Built with Node.js, Express, MongoDB, and Docker.
 
 ## 🎯 Overview
 
-CodeExec RCE is a **pay-per-execution** code execution service that provides:
+CodeExec RCE is a **free** code execution service that provides:
 - **Secure code execution** in isolated Docker containers
 - **Multi-language support** (JavaScript, Python, Java, Go, C++, Ruby)
 - **Resource management** with memory and CPU limits
-- **User authentication** and API key management
-- **Project management** with multi-file support
-- **Usage tracking** and billing system
+- **Execution metrics** and logging
 
 ## 🏗️ Architecture
 
@@ -35,21 +33,16 @@ CodeExec RCE is a **pay-per-execution** code execution service that provides:
 ### File Structure Mapping
 
 ```
-├── server.js                          # Main Express server
+├── server.js                          # Main Express server (missing)
 ├── apiGateWay.js                      # API orchestration layer
 ├── router/
-│   ├── engineRouter.js                # Code execution endpoints
-│   └── auth.js                        # Authentication endpoints
+│   └── engineRouter.js                # Code execution endpoints
 ├── engine-application/
 │   ├── executeEngineManager.js        # Docker execution manager v1
 │   ├── executeEngineManagerv2.js      # Docker execution manager v2
 │   └── remoteCode.js                  # Remote execution coordinator
 ├── application/
-│   ├── codeExecution.js               # Execution metrics & logging
-│   ├── userApiKeysApi.js              # API key management
-│   ├── userWalletApi.js               # Payment & billing system
-│   ├── projectsApi.js                 # Project management
-│   └── sharedProject.js               # Project sharing
+│   └── codeExecution.js               # Execution metrics & logging
 ├── docker-images/                     # Language-specific Docker configs
 │   ├── python/Dockerfile
 │   ├── javascript/Dockerfile
@@ -57,10 +50,6 @@ CodeExec RCE is a **pay-per-execution** code execution service that provides:
 │   ├── go/Dockerfile
 │   ├── cpp/Dockerfile
 │   └── ruby/Dockerfile
-└── models/                            # MongoDB schemas
-    ├── sighup.js                      # User authentication
-    ├── session.js                     # Session management
-    └── ...
 ```
 
 ## 🔧 RCE Implementation Details
@@ -139,42 +128,32 @@ router.post("/api/v2/execute", async function (req, res) {
 });
 ```
 
-### 4. **User Authentication & Billing**
+### 4. **Execution Metrics & Logging**
 
-**File**: `application/userApiKeysApi.js`
+**File**: `application/codeExecution.js`
 
 ```javascript
-// API key generation
-genenerateKey = async () => {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-        v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
+// Execution metrics tracking
+const codeExecution = new Schema({
+  userId: String,
+  language: String,
+  code: String,
+  output: String,
+  errorMessage: String,
+  executionTime: Number,
+  memoryUsage: String,
+  cpuUsage: String,
+  runTimeStatus: String
+});
 
-// Key validation
-verifyKey = async (apiKey) => {
-  const userKey = await UserKeys.findOne({ apiKey });
-  return userKey ? { isKeyValid: true, userKey } : { isKeyValid: false };
+// Save execution metrics
+createMetric = async (metric) => {
+  const result = await CodeExecution.create(metric);
+  return result;
 };
 ```
 
-**File**: `application/userWalletApi.js`
-
-```javascript
-// Fixed pricing model
-constructor() {
-  this.FIX_PRICE = 0.01; // $0.01 per execution
-}
-
-// Wallet validation
-haveEnoughtMoney = async (userId) => {
-  const walletInfo = await this.getUserWallet(userId);
-  const canMakeRequest = wallet.walletValue > 0;
-  return { succeeded: true, canMakeRequest };
-};
-```
+**Note**: The service is **free** and **anonymous** - no authentication required.
 
 ## 🐳 Docker Configuration
 
@@ -256,25 +235,6 @@ NAME=session-name
 
 ## 📊 API Usage
 
-### Authentication
-
-```javascript
-// Register user
-POST /api/register
-{
-  "email": "user@example.com",
-  "username": "username",
-  "password": "password"
-}
-
-// Login
-POST /api/login
-{
-  "email": "user@example.com",
-  "password": "password"
-}
-```
-
 ### Code Execution
 
 ```javascript
@@ -283,8 +243,6 @@ POST /api/v1/execute
 {
   "language": "javascript",
   "code": "console.log('Hello World')",
-  "userId": "user_id",
-  "projectId": "project_id",
   "saveMetric": true
 }
 
@@ -299,8 +257,6 @@ POST /api/v2/execute
       "isEntryPoint": true
     }
   ],
-  "userId": "user_id",
-  "projectId": "project_id",
   "saveMetric": true
 }
 ```
@@ -331,15 +287,12 @@ POST /api/v2/execute
 - **No network access** from containers
 
 ### API Security
-- **Session-based authentication**
-- **API key validation** (when enabled)
 - **Input validation** and sanitization
 - **Rate limiting** (to be implemented)
 
 ### Data Security
-- **Encrypted passwords** with bcrypt
-- **Secure session storage** in MongoDB
 - **No persistent storage** in containers
+- **Anonymous execution** - no user data stored
 
 ## 📈 Monitoring & Metrics
 
