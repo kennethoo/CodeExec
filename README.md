@@ -1,14 +1,15 @@
-# CodeExec RCE - Remote Code Execution Backend
+# CodeExec RCE - Anonymous Code Execution Service
 
-A simple, secure Remote Code Execution (RCE) service that allows users to execute code in multiple programming languages through a Docker-isolated API. Built with Node.js, Express, MongoDB, and Docker.
+A simple, secure, and **anonymous** Remote Code Execution (RCE) service that allows anyone to execute code in multiple programming languages through Docker-isolated containers. No authentication required!
 
 ## 🎯 Overview
 
-CodeExec RCE is a **free** code execution service that provides:
+CodeExec RCE is a **free** and **anonymous** code execution service that provides:
 - **Secure code execution** in isolated Docker containers
 - **Multi-language support** (JavaScript, Python, Java, Go, C++, Ruby)
 - **Resource management** with memory and CPU limits
-- **Execution metrics** and logging
+- **Anonymous execution** - no user accounts or authentication needed
+- **Execution metrics** and logging (optional)
 
 ## 🏗️ Architecture
 
@@ -21,7 +22,7 @@ CodeExec RCE is a **free** code execution service that provides:
                                 │                        │
                                 ▼                        ▼
                        ┌──────────────────┐    ┌─────────────────┐
-                       │  User Management │    │  Docker Engine  │
+                       │  Execution Logs  │    │  Docker Engine  │
                        └──────────────────┘    └─────────────────┘
                                 │
                                 ▼
@@ -30,19 +31,19 @@ CodeExec RCE is a **free** code execution service that provides:
                        └──────────────────┘
 ```
 
-### File Structure Mapping
+### File Structure
 
 ```
 ├── server.js                          # Main Express server (missing)
-├── apiGateWay.js                      # API orchestration layer
+├── apiGateWay.js                      # Simple API orchestration
 ├── router/
 │   └── engineRouter.js                # Code execution endpoints
 ├── engine-application/
-│   ├── executeEngineManager.js        # Docker execution manager v1
-│   ├── executeEngineManagerv2.js      # Docker execution manager v2
-│   └── remoteCode.js                  # Remote execution coordinator
+│   ├── executeEngineManager.js        # Single-file execution
+│   ├── executeEngineManagerv2.js      # Multi-file execution
+│   └── remoteCode.js                  # Execution coordinator
 ├── application/
-│   └── codeExecution.js               # Execution metrics & logging
+│   └── codeExecution.js               # Optional metrics logging
 ├── docker-images/                     # Language-specific Docker configs
 │   ├── python/Dockerfile
 │   ├── javascript/Dockerfile
@@ -50,6 +51,8 @@ CodeExec RCE is a **free** code execution service that provides:
 │   ├── go/Dockerfile
 │   ├── cpp/Dockerfile
 │   └── ruby/Dockerfile
+└── config/
+    └── keys.js                        # Configuration
 ```
 
 ## 🔧 RCE Implementation Details
@@ -128,32 +131,33 @@ router.post("/api/v2/execute", async function (req, res) {
 });
 ```
 
-### 4. **Execution Metrics & Logging**
+### 4. **Anonymous Execution Flow**
 
-**File**: `application/codeExecution.js`
+**File**: `apiGateWay.js`
 
 ```javascript
-// Execution metrics tracking
-const codeExecution = new Schema({
-  userId: String,
-  language: String,
-  code: String,
-  output: String,
-  errorMessage: String,
-  executionTime: Number,
-  memoryUsage: String,
-  cpuUsage: String,
-  runTimeStatus: String
-});
+// Simple anonymous execution
+executeCode = async ({ language, code, saveMetric = false }) => {
+  if (!language || code == undefined) {
+    return { succeeded: false, errorMessage: "Invalid input" };
+  }
 
-// Save execution metrics
-createMetric = async (metric) => {
-  const result = await CodeExecution.create(metric);
-  return result;
+  const result = await remoteCode.runCode({
+    language,
+    code,
+    userId: "anonymous",    // No authentication needed
+    projectId: "default",   // No project management
+    saveMetric,
+  });
+
+  return { succeeded: true, result };
 };
 ```
 
-**Note**: The service is **free** and **anonymous** - no authentication required.
+**Key Features**:
+- **No Authentication**: Direct code execution without user accounts
+- **Anonymous**: All executions run as "anonymous" user
+- **Simple API**: Just language, code, and optional metrics
 
 ## 🐳 Docker Configuration
 
@@ -192,8 +196,7 @@ CMD ["node","script.js"]
 
 - Node.js 20+
 - Docker
-- MongoDB
-- AWS EC2 (for production)
+- MongoDB (optional - only for metrics logging)
 
 ### Installation
 
@@ -208,10 +211,11 @@ cd codeexec-rce-backend
 npm install
 ```
 
-3. **Set up environment variables**
+3. **Set up environment variables** (optional)
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+# Create .env file
+echo "DB=mongodb://localhost:27017/codeexec" > .env
+echo "PORT=3000" >> .env
 ```
 
 4. **Build Docker images**
@@ -219,18 +223,13 @@ cp .env.example .env
 node docker-images/buildAllDockerImage.js
 ```
 
-5. **Start the server**
-```bash
-npm start
-```
+5. **Create the missing server.js file** (see below)
 
 ### Environment Variables
 
 ```env
-DB=mongodb://localhost:27017/codeexec
-PORT=3000
-SECRET=your-session-secret
-NAME=session-name
+DB=mongodb://localhost:27017/codeexec  # Optional - only for metrics
+PORT=3000                              # Server port
 ```
 
 ## 📊 API Usage
@@ -278,37 +277,40 @@ POST /api/v2/execute
 }
 ```
 
-## 🔒 Security Considerations
+## 🔒 Security Features
 
 ### Container Security
 - **Read-only filesystems** where possible
 - **Resource limits** prevent DoS attacks
 - **Automatic container cleanup** prevents resource leaks
 - **No network access** from containers
+- **Isolated execution** - each code run in separate container
 
 ### API Security
 - **Input validation** and sanitization
-- **Rate limiting** (to be implemented)
-
-### Data Security
-- **No persistent storage** in containers
 - **Anonymous execution** - no user data stored
+- **No persistent storage** in containers
 
-## 📈 Monitoring & Metrics
+### Privacy
+- **No authentication required** - completely anonymous
+- **No user tracking** - no personal data collected
+- **Optional metrics** - only execution logs if enabled
 
-### Execution Metrics
+## 📈 Optional Metrics & Logging
+
+### Execution Metrics (Optional)
 - **Execution time** tracking
 - **Memory usage** monitoring
 - **CPU utilization** measurement
 - **Success/failure rates**
 - **Error categorization**
 
-### Database Schema
+### Database Schema (Optional)
 
 ```javascript
-// Code execution log
+// Code execution log (only if saveMetric: true)
 const codeExecution = new Schema({
-  userId: String,
+  userId: String,           // Always "anonymous"
   language: String,
   code: String,
   output: String,
@@ -317,27 +319,30 @@ const codeExecution = new Schema({
   memoryUsage: String,
   cpuUsage: String,
   runTimeStatus: String,
-  projectId: String
+  projectId: String         // Always "default"
 });
 ```
 
+**Note**: Metrics are completely optional. Set `saveMetric: false` to disable logging entirely.
+
 ## 🚀 Deployment
 
-### AWS EC2 Deployment
+### Simple Deployment
 
-1. **Launch EC2 instance**
+1. **Launch server** (AWS EC2, DigitalOcean, etc.)
 2. **Install Docker and Node.js**
-3. **Set up MongoDB Atlas**
+3. **Set up MongoDB** (optional - only for metrics)
 4. **Deploy application**
-5. **Configure systemd service**
+5. **Configure reverse proxy** (nginx)
 
 ### Production Considerations
 
 - **Load balancing** for multiple instances
-- **Redis** for session storage
+- **Rate limiting** to prevent abuse
 - **CloudWatch** for monitoring
 - **Auto-scaling** based on demand
 - **SSL/TLS** termination
+- **Container registry** for Docker images
 
 ## 🤝 Contributing
 
@@ -358,6 +363,49 @@ This project is licensed under the ISC License.
 - Express.js for the web framework
 - The open-source community
 
+## ⚠️ Missing Server File
+
+The main `server.js` file is missing from this repository. You'll need to create it to run the service:
+
+```javascript
+// server.js
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import engineRouter from './router/engineRouter.js';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(helmet());
+app.use(compression());
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+// Connect to MongoDB (optional)
+if (process.env.DB) {
+  mongoose.connect(process.env.DB);
+}
+
+// Routes
+app.use('/', engineRouter);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 CodeExec RCE server running on port ${PORT}`);
+});
+```
+
 ---
 
-**Note**: This is a production-ready RCE service with proper security measures. Always test thoroughly before deploying to production environments.
+**Note**: This is a simple, anonymous RCE service with Docker security. Perfect for educational purposes, testing, or as a building block for more complex systems.
