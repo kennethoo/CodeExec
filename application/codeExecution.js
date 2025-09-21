@@ -35,21 +35,31 @@ class CodeExecutionApi {
   // this is to created a space
 
   createMetric = async (metric) => {
-    const result = await CodeExecution.create(metric);
-
-    return result;
+    try {
+      const result = await CodeExecution.create(metric);
+      return result;
+    } catch (error) {
+      // If MongoDB is not available, just log and continue
+      console.log('⚠️  Could not save metrics to database:', error.message);
+      return null;
+    }
   };
   deleteMetric = () => {};
   updateMetric = () => {};
   getMetricById = () => {};
 
   get = async (query) => {
-    const { limit, skip, filter } = query;
-    const logs = await CodeExecution.find(filter)
-      .sort({ _id: -1 })
-      .limit(limit)
-      .skip(skip);
-    return { succeeded: true, logs };
+    try {
+      const { limit, skip, filter } = query;
+      const logs = await CodeExecution.find(filter)
+        .sort({ _id: -1 })
+        .limit(limit)
+        .skip(skip);
+      return { succeeded: true, logs };
+    } catch (error) {
+      console.log('⚠️  Could not retrieve metrics from database:', error.message);
+      return { succeeded: false, logs: [], error: 'Database not available' };
+    }
   };
 }
 
