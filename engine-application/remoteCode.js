@@ -9,12 +9,12 @@ export class RemoteEnginerMannager {
     this.JAVA = "java";
     this.CPP = "cpp";
     this.RUBY = "ruby";
-    this.MEETTUM_NODE_IMAGE = "amzat/meettum-node-image:v1.0";
-    this.MEETTUM_PYTHON_IMAGE = "amzat/meettum-python-image:v1.0";
-    this.MEETTUM_JAVA_IMAGE = "amzat/meettum-java-image";
-    this.MEETTUM_GOLANG = "amzat/meettum-go-image";
-    this.MEETTUM_CPP = "amzat/meettum-cpp-image";
-    this.MEETTUM_RUBY = "amzat/meettum-ruby-image";
+    this.RCE_NODE_IMAGE = "rce/node-image:v1.0";
+    this.RCE_PYTHON_IMAGE = "rce/python-image:v1.0";
+    this.RCE_JAVA_IMAGE = "rce/java-image";
+    this.RCE_GOLANG = "rce/go-image";
+    this.RCE_CPP = "rce/cpp-image";
+    this.RCE_RUBY = "rce/ruby-image";
 
     this.supportedLanGuage = [
       this.JAVASCRIPT,

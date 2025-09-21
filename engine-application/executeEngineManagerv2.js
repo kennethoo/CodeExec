@@ -13,12 +13,12 @@ class ExecuteEngineManagerV2 {
     this.JAVA = "java";
     this.CPP = "cpp";
     this.RUBY = "ruby";
-    this.MEETTUM_NODE_IMAGE = "meetcode/meettum-node-image:v1.0";
-    this.MEETTUM_PYTHON_IMAGE = "meetcode/meettum-python-image:v1.0";
-    this.MEETTUM_JAVA_IMAGE = "meetcode/meettum-java-image";
-    this.MEETTUM_GOLANG = "meetcode/meettum-go-image";
-    this.MEETTUM_CPP = "meetcode/meettum-cpp-image";
-    this.MEETTUM_RUBY = "meetcode/meettum-ruby-image";
+    this.RCE_NODE_IMAGE = "rce/node-image:v1.0";
+    this.RCE_PYTHON_IMAGE = "rce/python-image:v1.0";
+    this.RCE_JAVA_IMAGE = "rce/java-image";
+    this.RCE_GOLANG = "rce/go-image";
+    this.RCE_CPP = "rce/cpp-image";
+    this.RCE_RUBY = "rce/ruby-image";
 
     this.codeFolder = "./sandBox/tempSanbox";
 
@@ -29,17 +29,17 @@ class ExecuteEngineManagerV2 {
 
   getDockerImage = (language) => {
     if (language === this.JAVASCRIPT) {
-      return this.MEETTUM_NODE_IMAGE;
+      return this.RCE_NODE_IMAGE;
     } else if (language === this.PYTHON) {
-      return this.MEETTUM_PYTHON_IMAGE;
+      return this.RCE_PYTHON_IMAGE;
     } else if (language === this.JAVA) {
-      return this.MEETTUM_JAVA_IMAGE;
+      return this.RCE_JAVA_IMAGE;
     } else if (language === this.GO) {
-      return this.MEETTUM_GOLANG;
+      return this.RCE_GOLANG;
     } else if (language === this.RUBY) {
-      return this.MEETTUM_RUBY;
+      return this.RCE_RUBY;
     } else if (language === this.CPP) {
-      return this.MEETTUM_CPP;
+      return this.RCE_CPP;
     }
   };
 

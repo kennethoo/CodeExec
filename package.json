@@ -1,8 +1,8 @@
 {
-  "name": "codesanbox",
+  "name": "rce-code-execution",
   "version": "1.0.0",
   "type": "module",
-  "description": "",
+  "description": "Anonymous Remote Code Execution service with Docker isolation",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
