@@ -2,6 +2,66 @@
 
 A simple, secure, and **anonymous** Remote Code Execution (RCE) service that allows anyone to execute code in multiple programming languages through Docker-isolated containers. No authentication required!
 
+## 🐳 Why Docker for RCE?
+
+**Docker is a popular container system** that provides the perfect foundation for building a safe and secure Remote Code Execution (RCE) service. When you build an RCE system, you need to ensure it's both **safe and secure** for everyone.
+
+### **🔒 Security Through Isolation**
+
+We use **Docker because we can create an isolated environment** and execute code safely for anyone. Here's why this approach is essential:
+
+- **Complete Isolation**: Each code execution runs in its own container, completely separate from the host system
+- **Resource Control**: We can limit memory, CPU, and execution time to prevent abuse
+- **No Persistent Storage**: Containers are destroyed after execution - no data leaks
+- **Sandboxed Environment**: Code cannot access the host system or other containers
+- **Language Independence**: Each language runs in its own optimized environment
+
+### **🚀 How It Works**
+
+#### **1. User Sends Code**
+When a user sends code to our API, we receive:
+- The programming language
+- The actual code to execute
+- Optional metrics logging preference
+
+#### **2. API Gateway Creates Temporary File**
+The API Gateway:
+- Validates the language and code
+- Creates a temporary file with the user's code
+- Generates a unique job ID for tracking
+
+#### **3. Docker Container Creation**
+We then:
+- Create a Docker container for the specific language
+- Bind the temporary file to the container
+- Set resource limits (memory, CPU, time)
+- Mount the code as read-only inside the container
+
+#### **4. Safe Execution**
+This way we can run **literally anything** safely:
+- The code executes in complete isolation
+- No access to host system files or network
+- Resource limits prevent system abuse
+- Automatic cleanup after execution
+
+### **➕ Adding New Languages**
+
+To add support for a new programming language, you just need to:
+
+1. **Create a Docker image** for that language
+2. **Follow the Docker execution code** pattern
+3. **Add the language** to the supported languages list
+
+We built this in **Node.js to be as simple as possible** - the entire system is straightforward and easy to extend.
+
+### **🏗️ Architecture Overview**
+
+```
+User Code → API Gateway → Temporary File → Docker Container → Safe Execution → Results
+```
+
+This approach ensures that **any code can be executed safely** without compromising the host system or other users' data.
+
 ## 🎯 Overview
 
 CodeExec RCE is a **free** and **anonymous** code execution service that provides:
